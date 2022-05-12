@@ -1,4 +1,4 @@
-export default function Nodes({ $target, initialState }) {
+export default function Nodes({ $target, initialState, onClick }) {
   this.state = initialState;
   this.$element = document.createElement("div");
   this.$element.className = "Nodes";
@@ -10,18 +10,20 @@ export default function Nodes({ $target, initialState }) {
   };
   this.render = () => {
     const { items, isRoot } = this.state;
-    this.$element.innerHTML = isRoot
-      ? ""
-      : '<div class="Node"><img src="./assets/prev.png"></div>' +
-        items
-          .map(
-            ({ type, content }) => `<div class="Node">
-    <img src=${
-      type === "directory" ? "./assets/directory.png" : "./assets/file.png"
-    }>
-    <div>${content}</div>
-    </div>`
-          )
-          .join("");
+    this.$element.innerHTML =
+      (isRoot ? "" : '<div class="Node"><img src="./assets/prev.png"></div>') +
+      `
+      ${items
+        .map(
+          ({ id, type, name }) => `<div class="Node" id=${id}>
+      <img src=${
+        type === "DIRECTORY" ? "./assets/directory.png" : "./assets/file.png"
+      }>
+      <div>${name}</div></div>`
+        )
+        .join("")}`;
+    document.querySelectorAll(".Node").forEach(e => {
+      e.addEventListener("click", onClick);
+    });
   };
 }

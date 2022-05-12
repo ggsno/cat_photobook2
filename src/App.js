@@ -1,26 +1,57 @@
 import Breadcrumb from "./Breadcrumb.js";
 import Nodes from "./Nodes.js";
+import { fetchNodes } from "./api.js";
+import Loading from "./Loading.js";
 
 export default function App({ $target }) {
   this.state = {
-    breadcrumb: ["root", "yellow cat"],
-    nodes: []
+    breadcrumbList: ["root"],
+    nodesList: []
   };
 
-  const { breadcrumb, nodes } = this.state;
+  this.render = () => {
+    breadcrumb.setState({ $target, items: this.state.breadcrumbList });
+    nodes.setState({
+      $target,
+      items: this.state.nodesList,
+      isRoot: this.state.breadcrumbList.length === 1
+    });
+  };
 
-  new Breadcrumb({
+  const setState = nextState => {
+    this.state = { ...this.state, ...nextState };
+    this.render();
+  };
+
+  const breadcrumb = new Breadcrumb({
     $target,
     initialState: {
-      items: breadcrumb
-    }
-  }).render();
+      items: this.state.breadcrumbList
+    },
+    onClick: () => {}
+  });
 
-  new Nodes({
+  const nodes = new Nodes({
     $target,
     initialState: {
-      items: nodes,
-      isRoot: breadcrumb.length === 1
+      items: this.state.nodesList,
+      isRoot: this.state.breadcrumbList.length === 1
+    },
+    onClick: e => {
+      console.log(e.currentTarget.id);
+      console.log(document.getElementById(`${e.currentTarget.id}`));
+      setState({ breadcrumbList: breadcrumbList.concat() });
     }
-  }).render();
+  });
+
+  const loading = new Loading({ $target, initialState: { isLoading: true } });
+  loading.render();
+
+  const fetchAPI = async () => {
+    loading.setState({ isLoading: true });
+    setState({ nodesList: await fetchNodes() });
+    loading.setState({ isLoading: false });
+  };
+
+  fetchAPI();
 }
