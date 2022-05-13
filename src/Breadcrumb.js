@@ -9,6 +9,8 @@ export default function Breadcrumb({ $target, initialState }) {
   };
   this.render = () => {
     const { items } = this.state;
-    this.$element.innerHTML = items.map(e => `<div>${e}</div>`).join("");
+    this.$element.innerHTML = items
+      .map(({ name }) => `<div>${name}</div>`)
+      .join("");
   };
 }

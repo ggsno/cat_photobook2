@@ -11,4 +11,4 @@ const request = async url => {
   }
 };
 
-export const fetchNodes = () => request(API_END_POINT);
+export const fetchNodes = id => request(`${API_END_POINT}/${id ? id : ""}`);

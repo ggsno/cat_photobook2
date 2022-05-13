@@ -5,22 +5,8 @@ import Loading from "./Loading.js";
 
 export default function App({ $target }) {
   this.state = {
-    breadcrumbList: ["root"],
+    breadcrumbList: [{ name: "root" }],
     nodesList: []
-  };
-
-  this.render = () => {
-    breadcrumb.setState({ $target, items: this.state.breadcrumbList });
-    nodes.setState({
-      $target,
-      items: this.state.nodesList,
-      isRoot: this.state.breadcrumbList.length === 1
-    });
-  };
-
-  const setState = nextState => {
-    this.state = { ...this.state, ...nextState };
-    this.render();
   };
 
   const breadcrumb = new Breadcrumb({
@@ -37,21 +23,53 @@ export default function App({ $target }) {
       items: this.state.nodesList,
       isRoot: this.state.breadcrumbList.length === 1
     },
-    onClick: e => {
-      console.log(e.currentTarget.id);
-      console.log(document.getElementById(`${e.currentTarget.id}`));
-      setState({ breadcrumbList: breadcrumbList.concat() });
+    onClick: node => {
+      if (!node) {
+      } else if (node.type === "DIRECTORY") {
+        renderPage(node);
+      } else {
+      }
     }
   });
 
-  const loading = new Loading({ $target, initialState: { isLoading: true } });
-  loading.render();
+  const setState = nextState => {
+    this.state = { ...this.state, ...nextState };
 
-  const fetchAPI = async () => {
+    breadcrumb.setState({ $target, items: this.state.breadcrumbList });
+    nodes.setState({
+      $target,
+      items: this.state.nodesList,
+      isRoot: this.state.breadcrumbList.length === 1
+    });
+  };
+
+  const loading = new Loading({ $target, isLoading: false });
+
+  const renderPage = async node => {
     loading.setState({ isLoading: true });
-    setState({ nodesList: await fetchNodes() });
+    if (!node)
+      // init
+      setState({
+        nodesList: await fetchNodes(),
+        breadcrumbList: this.state.breadcrumbList
+      });
+    else {
+      const curIndex = breadcrumbList.findIndex(bc => bc.id === node.id);
+      if (curIndex === -1) {
+        setState({
+          nodesList: await fetchNodes(node.id),
+          breadcrumbList: this.state.breadcrumbList.concat(node)
+        });
+      } else {
+        setState({
+          nodesList: await fetchNodes(node.id),
+          breadcrumbList: this.state.breadcrumbList.slice(curIndex + 1)
+        });
+      }
+    }
+
     loading.setState({ isLoading: false });
   };
 
-  fetchAPI();
+  renderPage();
 }
