@@ -2,11 +2,13 @@ import Breadcrumb from "./Breadcrumb.js";
 import Nodes from "./Nodes.js";
 import { fetchNodes } from "./api.js";
 import Loading from "./Loading.js";
+import ImageViewer from "./ImageViewer.js";
 
 export default function App({ $target }) {
   this.state = {
     breadcrumbList: [{ name: "root" }],
-    nodesList: []
+    nodesList: [],
+    cache: []
   };
 
   const breadcrumb = new Breadcrumb({
@@ -24,10 +26,16 @@ export default function App({ $target }) {
       isRoot: this.state.breadcrumbList.length === 1
     },
     onClick: node => {
+      console.log(node);
       if (!node) {
+        this.state.breadcrumbList.pop();
+        renderPage(
+          this.state.breadcrumbList[this.state.breadcrumbList.length - 1]
+        );
       } else if (node.type === "DIRECTORY") {
         renderPage(node);
       } else {
+        new ImageViewer({ $target, initialState: { filePath: node.filePath } });
       }
     }
   });
@@ -48,13 +56,14 @@ export default function App({ $target }) {
   const renderPage = async node => {
     loading.setState({ isLoading: true });
     if (!node)
-      // init
       setState({
         nodesList: await fetchNodes(),
         breadcrumbList: this.state.breadcrumbList
       });
     else {
-      const curIndex = breadcrumbList.findIndex(bc => bc.id === node.id);
+      const curIndex = this.state.breadcrumbList.findIndex(
+        bc => bc.id === node.id
+      );
       if (curIndex === -1) {
         setState({
           nodesList: await fetchNodes(node.id),
@@ -63,7 +72,7 @@ export default function App({ $target }) {
       } else {
         setState({
           nodesList: await fetchNodes(node.id),
-          breadcrumbList: this.state.breadcrumbList.slice(curIndex + 1)
+          breadcrumbList: this.state.breadcrumbList
         });
       }
     }
