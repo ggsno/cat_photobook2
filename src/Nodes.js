@@ -2,7 +2,13 @@ export default function Nodes({ $target, initialState, onClick }) {
   this.state = initialState;
   this.$element = document.createElement("div");
   this.$element.className = "Nodes";
-  this.onClick = onClick;
+  this.$element.addEventListener("click", e => {
+    onClick(
+      this.state.items.find(
+        node => node.id === e.target.closest(".Node").dataset.nodeId
+      ) || { type: "BACK" }
+    );
+  });
   $target.appendChild(this.$element);
 
   this.setState = nextState => {
@@ -23,14 +29,5 @@ export default function Nodes({ $target, initialState, onClick }) {
       <div>${name}</div></div>`
         )
         .join("")}`;
-    document.querySelectorAll(".Node").forEach($node => {
-      $node.addEventListener("click", e => {
-        this.onClick(
-          this.state.items.find(
-            node => node.id === e.currentTarget.dataset.nodeId
-          ) || null
-        );
-      });
-    });
   };
 }
